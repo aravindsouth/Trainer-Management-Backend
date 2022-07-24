@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.4.6"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  },
+  "name": "trainer_management_backend",
+  "version": "1.0.0",
+  "description": "Trainer Management System backend, FSD project group 4 ",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev-start": "nodemon app.js"
+  },
+  "author": "ABCD-FSD-March-2022-B1 Project Group 4",
+  "license": "ISC"
+}
