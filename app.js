@@ -12,6 +12,42 @@ app.use(express.json());
 const userData = require("./src/model/UserModel");
 const trainerData = require("./src/model/TrainerModel");
 
+// token verification
+
+function verifyAdminToken(req, res, next) {
+    if(!req.headers.authorization) {
+        return res.status(401).send('Unauthorised request')
+    }
+    let token = req.headers.authorization.split(' ')[1]
+    if (token == 'null') {
+        return res.status(401).send('Unauthorised Request')
+    }
+    let payload = jwt.verify(token, 'adminKey')
+    console.log(payload)
+    if (!payload) {
+        return res.status(401).send('Unauthorised Request')
+    }
+    req.userId = payload.subject;
+    next();
+}
+
+function verifyTrainerToken(req, res, next) {
+    if(!req.headers.authorization) {
+        return res.status(401).send('Unauthorised request')
+    }
+    let token = req.headers.authorization.split(' ')[1]
+    if (token == 'null') {
+        return res.status(401).send('Unauthorised Request')
+    }
+    let payload = jwt.verify(token, 'trainerKey')
+    console.log(payload)
+    if (!payload) {
+        return res.status(401).send('Unauthorised Request')
+    }
+    req.userId = payload.subject;
+    next();
+}
+
 // get methods
 
 app.get("/", (req, res) => {
@@ -19,7 +55,7 @@ app.get("/", (req, res) => {
     // console.log(req);
 })
 
-app.get("/trainers", function(req, res) {
+app.get("/trainers", verifyAdminToken, function(req, res) {
     trainerData.find()
     .then((trainers) => {
         res.send(trainers).status(200);
@@ -29,14 +65,14 @@ app.get("/trainers", function(req, res) {
 // post methods
 
 app.post("/login", function(req,res) {
-    var checkuser = {
+    var checkUser = {
         email:req.body.email,
         pwd:req.body.password
     };
     console.log('log in process start');
-    console.log(checkuser);
+    console.log(checkUser);
     try {
-        userData.findOne({"username": checkuser.email}, (error, user) => {
+        userData.findOne({"username": checkUser.email}, (error, user) => {
             console.log(user)
             if(error) {
                 console.log(error);
@@ -46,18 +82,20 @@ app.post("/login", function(req,res) {
                     res.status(401).send("Invalid Email");
                     // res.json({status:false});
                 }
-                else if (checkuser.pwd != user.password) {
+                else if (checkUser.pwd != user.password) {
                     res.status(401).send("Invalid Password");
                     // res.json({status:false});
                 }
                 else {
-                    let payload = {subject: user._id};;
-                    let token = jwt.sign(payload, "secretkey1");;
-                    console.log(token);
+                    let payload = {subject: checkUser.email+checkUser.password};;
                     if (user.role == "admin"){
+                        let token = jwt.sign(payload, "adminKey");
+                        console.log("admin token: ",token);
                     res.status(200).send({status:true,name:user.username,role: "admin",token});
                     } else {
-                        res.status(200).send({status:true,name:user.username,token});
+                        let token = jwt.sign(payload, "trainerKey");
+                        console.log("trainer token: ",token);
+                        res.status(200).send({status:true,name:user.username,role: "trainer",token});
                     }
                 }
             }
@@ -126,7 +164,7 @@ app.post("/signup", function(req,res) {
     })
 })
 
-app.post("/enroll", function(req, res) {
+app.post("/enroll", verifyTrainerToken, function(req, res) {
     var trainer = {
         email: req.body.email,
         address: req.body.address,
