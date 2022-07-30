@@ -113,7 +113,7 @@ app.post("/signup", function(req,res) {
         dob: req.body.dob,
         email: req.body.email,
         mobile: req.body.mobile,
-        highestqual: req.hqual,
+        highestqual: req.body.hqual,
         password: req.body.password
     };
     console.log('signup process starts');
@@ -157,7 +157,7 @@ app.post("/signup", function(req,res) {
                             console.log("trainer added",trainer)
                         }
                     })
-                    res.json({status:true}).status(200)
+                    res.json({status:true, reason: "trainer added"}).status(200)
                 }
             })
         }
