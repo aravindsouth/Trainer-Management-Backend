@@ -62,6 +62,18 @@ app.get("/trainers", verifyAdminToken, function(req, res) {
     })
 })
 
+app.get("/trainer-profile/:trainer_email", verifyTrainerToken, function(req, res) {
+    trainerData.findOne({"email": req.params.trainer_email}, (error, trainer) => {
+        if(!error) {
+        console.log(req.params)
+        console.log(trainer);
+        res.send(trainer).status(200)
+        } else {
+            res.send("trainer data not found")
+        }
+    })
+})
+
 // post methods
 
 app.post("/login", function(req,res) {
@@ -95,7 +107,11 @@ app.post("/login", function(req,res) {
                     } else {
                         let token = jwt.sign(payload, "trainerKey");
                         console.log("trainer token: ",token);
-                        res.status(200).send({status:true,name:user.username,role: "trainer",token});
+                        res.status(200).send(
+                            {status:true,
+                            trainer_email:user.username,
+                            role: "trainer",
+                            token});
                     }
                 }
             }
