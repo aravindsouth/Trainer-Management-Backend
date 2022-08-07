@@ -180,7 +180,7 @@ app.post("/signup", function(req,res) {
     })
 })
 
-app.patch("/enroll", verifyTrainerToken, function(req, res) {
+app.put("/enroll", verifyTrainerToken, function(req, res) {
     var trainer = {
         email: req.body.email,
         address: req.body.address,
