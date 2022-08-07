@@ -19,6 +19,7 @@ const trainerSchema = new schema({
     photo: String,
     trainer_id: String,
     approved: Boolean,
+    employment_type: String,
     ict_data: {
         start_date: Date,
         end_date: Date,

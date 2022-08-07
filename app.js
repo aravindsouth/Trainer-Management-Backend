@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config({path:__dirname+'/.env'});
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -48,7 +49,38 @@ function verifyTrainerToken(req, res, next) {
     next();
 }
 
+function sendEmail(data) {
+    try {console.log(data)
+    let transport=  { 
+    host: "smtp-relay.sendinblue.com",
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: "aravindkerala1@gmail.com",
+      pass: process.env.MAILER_PASS,
+    }}
+    let email_data = {
+        from: "admin@ictaktrainer.com",
+        to: data.email,
+        subject: "Trainer Approved",
+        text: `You have been successfully enrolled to ${data.employment_type} . Your ID is ${data.trainer_id}`,
+        html: `You have been successfully enrolled to ${data.employment_type} . Your ID is ${data.trainer_id}`
+      };
+    let transporter = nodemailer.createTransport(transport)
+
+    transporter.sendMail(email_data, function(err, info) {
+        if(err) {
+            console.log(err)
+        }else {
+            console.log(info)
+        }
+    })
+    }catch (error){
+        return error
+    }
+}
 // get methods
+
 
 app.get("/", (req, res) => {
     res.send("<h2>ICT Trainer Management System</h2><p>FSD Project group 4</p><p>Backend</p>");
@@ -210,6 +242,54 @@ app.post("/enroll", verifyTrainerToken, function(req, res) {
                             })
 })
 
+app.put("/approve-trainer",verifyAdminToken, function(req, res) {
+    console.log("trainer received:"+req.body.email)
+    trainerData.updateOne({email: req.body.email},
+                            {approved: true},
+                            (error, trainer) => {
+                                if(error) {
+                                    console.log(error)
+                                    res.json({status: false, reason: "trainer not updated"}).status(500)
+                                }else {
+                                    console.log(trainer)
+                                    res.json({status: true, reply: "trainer approved"}).status(200);
+                                }
+                            })
+})
+
+// app.put("/set-employment-type", function(req, res) {
+//     console.log("trainer received:"+req.body.email)
+//     let trainer = {
+//         email: req.body.email,
+//         employment_type: req.body.employment_type,
+//         trainer_id: req.body.trainer_id,
+//         name: req.body.name
+//     }
+//     trainerData.updateOne({email: trainer.email},
+//                             {employment_type: trainer.employment_type},
+//                             (error, trainer) =>{
+//                                 if(error) {
+//                                     console.log(error)
+//                                     res.json({status: false, reason: "employment status not updated"}).status(500)  
+//                             }else {
+//                                 console.log(trainer)
+//                                 sendEmail(trainer)
+//                                 res.json({status: true, reply: "employment updated email sent"}).status(200);
+//                             }
+// } )
+// })
+
+app.put("/set-employment-type", function(req, res) {
+    console.log("trainer received:"+req.body.email)
+    let trainer = {
+        email: req.body.email,
+        employment_type: req.body.employment_type,
+        trainer_id: req.body.trainer_id,
+        name: req.body.name
+   }
+   sendEmail(trainer)
+    res.json({status: true, reply: "employment updated email sent"}).status(200)
+ })
 app.listen(PORT, () => {
     console.log(`app ready on port: ${PORT}`);
 })
