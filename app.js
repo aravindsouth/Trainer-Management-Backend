@@ -12,6 +12,7 @@ app.use(express.json());
 
 const userData = require("./src/model/UserModel");
 const trainerData = require("./src/model/TrainerModel");
+const { findOneAndReplace } = require("./src/model/TrainerModel");
 
 // token verification
 
@@ -81,6 +82,17 @@ function sendEmail(data) {
         return error
     }
 }
+
+function generateId(trainer) {
+            console.log('function reached')
+            let part1 = trainer.phone.slice(6)
+            let part2 = trainer.dob.slice(0,2)
+            console.log("trainer id generated: "+ part1 + part2)
+            return `T${part1}${part2}`
+
+}
+
+// var approveTrainer;
 // get methods
 
 
@@ -248,17 +260,26 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
 
 app.put("/approve-trainer", verifyAdminToken, function (req, res) {
     console.log("trainer received:" + req.body.email)
-    trainerData.updateOne({ email: req.body.email },
-        { approved: true },
-        (error, trainer) => {
-            if (error) {
-                console.log(error)
-                res.json({ status: false, reason: "trainer not updated" }).status(500)
-            } else {
-                console.log(trainer)
-                res.json({ status: true, reply: "trainer approved" }).status(200);
-            }
-        })
+    trainerData.findOne({email: req.body.email}, function (error, trainer) {     
+        if(!error){
+            approveTrainer = trainer;
+            console.log('approval started')
+            console.log("trainer found:"+ trainer)
+            trainerData.updateOne({ email: req.body.email },
+                { $set: {approved: true, trainer_id: generateId(approveTrainer)} },
+                (error, trainer) => {
+                    console.log('updateOne reached')
+                    if (error) {
+                        console.log(error)
+                        res.json({ status: false, reason: "trainer not updated" }).status(500)
+                    } else {
+                        console.log(trainer)
+                        res.json({ status: true, reply: "trainer approved" }).status(200);
+                    }
+                })
+        }else {console.log(error)}        
+    });
+
 })
 
 // app.put("/set-employment-type", function(req, res) {
@@ -294,6 +315,29 @@ app.put("/set-employment-type", function (req, res) {
     sendEmail(trainer)
     res.json({ status: true, reply: "employment updated email sent" }).status(200)
 })
+
+app.put("/add-course", verifyAdminToken, function(req, res) {
+    console.log(req.body)
+    course_data = {
+        course_id: req.body.course_id,
+        batch_id: req.body.batch_id,
+        start_date: req.body.start_date,
+        end_date: req.body.end_date,
+        time: req.body.course_time,
+        meeting_location: req.body.meetlink,
+        schedule: req.body.schedule
+    }
+    trainerData.updateOne({email: req.body.email}, {$push: {ict_courses_data: course_data}}, (err, trainer) => {
+        if(!err) {
+            console.log("updated trainer: "+trainer)
+            res.json({status: true, reason: "course added"}).status(200)
+        }else {
+            console.log(err)
+            res.json({status: false, reason: "course not added"}).status(500)
+        }
+    })
+})
+
 app.listen(PORT, () => {
     console.log(`app ready on port: ${PORT}`);
 })
