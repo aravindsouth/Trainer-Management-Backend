@@ -63,11 +63,11 @@ function sendEmail(data) {
             }
         }
         let email_data = {
-            from: "admin@ictaktrainer.com",
+            from: "ictacademyadmin@ictaktrainer.com",
             to: data.email,
             subject: "Trainer Approved",
-            text: `You have been successfully enrolled to ${data.employment_type} . Your ID is ${data.trainer_id}`,
-            html: `You have been successfully enrolled to ${data.employment_type} . Your ID is ${data.trainer_id}`
+            text: `Your emplyment type is: ${data.employment_type} . Your ID is ${data.trainer_id}`,
+            html: `<p> Hi ${data.name} </p> <p>Your employment type is: ${data.employment_type}.</p><p> Your ID is ${data.trainer_id}</p>`
         };
         let transporter = nodemailer.createTransport(transport)
 
@@ -305,15 +305,27 @@ app.put("/approve-trainer", verifyAdminToken, function (req, res) {
 // })
 
 app.put("/set-employment-type", function (req, res) {
-    console.log("trainer received:" + req.body.email)
+    console.log("trainer received for employment update: \n" + req.body.email)
     let trainer = {
         email: req.body.email,
         employment_type: req.body.employment_type,
         trainer_id: req.body.trainer_id,
         name: req.body.name
     }
-    sendEmail(trainer)
-    res.json({ status: true, reply: "employment updated email sent" }).status(200)
+    // sendEmail(trainer)
+    // res.json({ status: true, reply: "employment updated email sent" }).status(200)
+    trainerData.updateOne({email: trainer.email},
+        {$set: {employment_type: trainer.employment_type}},
+        (error, user) =>{
+            if(error) {
+                console.log(error)
+                res.json({status: false, reason: "employment status not updated"}).status(500)  
+        }else {
+            console.log(trainer)
+            sendEmail(trainer)
+            res.json({status: true, reply: "employment updated email sent"}).status(200);
+        }
+} )
 })
 
 app.put("/add-course", verifyAdminToken, function(req, res) {
