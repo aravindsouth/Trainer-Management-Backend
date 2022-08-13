@@ -239,15 +239,15 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
         photo: req.body.photo,
         trainer_id: req.body.t_id
     };
-    trainerData.updateOne({ email: trainer.email },
+    trainerData.findOneAndUpdate({ email: trainer.email },
         {
-            address: trainer.address,
+            $set:{address: trainer.address,
             skills: trainer.skills,
             company: trainer.company,
             designation: trainer.designation,
             courses: trainer.courses,
             photo: req.body.photo,
-            trainer_id: req.body.t_id,
+            trainer_id: req.body.t_id}
         }, (error, trainer) => {
             if (error) {
                 console.log(error);
