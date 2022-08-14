@@ -5,6 +5,10 @@ dotenv.config({ path: __dirname + '/.env' });
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
+//For Multer
+const multer    = require('multer');
+const path      = require('path');
+
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
@@ -216,6 +220,61 @@ app.post("/signup", function (req, res) {
     })
 })
 
+
+//for file upload - MULTER -------------------------------------------------------------------------
+var storage = multer.diskStorage({
+    destination: function(req, res, cb) {
+        cb(null, 'profileimages/')
+    },
+    filename: function(req, file, cb) {
+        let ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext);
+    }
+});
+
+var upload = multer({
+    storage: storage,
+    fileFilter: function(req, file, callback) {
+        if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+            callback(null, true);
+        } else {
+            console.log('File type not supported');
+            callback(null, false);
+        }
+    },
+
+    limits: {
+        fileSize: 1024*1024*50
+    }
+
+});
+
+app.post('/uploadphoto', upload.single('file'), (req, res, next) => {
+    const file = req.file;        
+    console.log(file.filename);
+    if(!file) {
+        const error = new Error("No files uploaded!");
+        error.httpStatusCode = 400;
+        return next(error);
+    } else {        
+        res.send(file);
+    }
+
+    // Save to mongodb collection
+    console.log(req.body.photo);
+        
+    // var upimage = {        
+    //     photo: req.file.filename
+    // }
+    // var info = new upimage(info);
+    // info.save();
+    // res.json({status: true, reason: "info added"}).status(200);
+    // console.log("Successfully added");
+    
+});
+//-------------------------------------------------------------------------------------------------------------
+
+
 app.put("/enroll", verifyTrainerToken, function (req, res) {
     var trainer = {
         email: req.body.email,
@@ -241,6 +300,8 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
                 console.log(error);
             } else {
                 console.log(trainer);
+                // var info = new trainer(info);
+                // info.save();
                 res.json({ status: true, reply: "trainer update" }).status(200);
             }
         })
