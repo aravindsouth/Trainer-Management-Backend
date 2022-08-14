@@ -137,11 +137,11 @@ app.post("/login", function (req, res) {
             }
             else {
                 if (!user) {
-                    res.status(401).send("Invalid Email");
+                    res.json({status:false}).status(401);
                     // res.json({status:false});
                 }
                 else if (checkUser.pwd != user.password) {
-                    res.status(401).send("Invalid Password");
+                    res.json({status:false}).status(401);
                     // res.json({status:false});
                 }
                 else {
