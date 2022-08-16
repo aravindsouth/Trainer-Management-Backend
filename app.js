@@ -5,6 +5,10 @@ dotenv.config({ path: __dirname + '/.env' });
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
+//For Multer
+const multer    = require('multer');
+const path      = require('path');
+
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
@@ -228,7 +232,69 @@ app.post("/signup", function (req, res) {
     })
 })
 
+//for file upload - MULTER -------------------------------------------------------------------------
+
+//Sets up file storage destination
+var storage = multer.diskStorage({
+    destination: function(req, res, cb) {
+        cb(null, './assets/profileimages/')
+    },
+    filename: function(req, file, cb) {
+        let ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext);
+    }
+});
+
+var upload = multer({
+    storage: storage,
+
+    //Specifying default file types to uplod
+    fileFilter: function(req, file, callback) {
+        if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+            callback(null, true);
+        } else {
+            console.log('File type not supported');
+            callback(null, false);
+        }
+    },
+
+    limits: {
+        fileSize: 1024*1024*5
+    }
+
+});
+
+app.post('/uploadphoto', upload.single('file'), (req, res, next) => {
+    const file = req.file;        
+    console.log(file.filename);
+    if(!file) {
+        const error = new Error("No files uploaded!");
+        error.httpStatusCode = 400;
+        return next(error);
+    } else {        
+        res.send(file);
+    }
+
+    // Save to mongodb collection
+        
+    var upimage = {        
+        photo: 'http://localhost:3000/assets/profileimages/'+req.file.filename
+    }
+    var info = new upimage(info);
+    info.save();
+    res.json({status: true, reason: "info added"}).status(200);
+    console.log("Successfully added");
+    
+});
+// -------------------------------------------------------------------------------------------------------------
+
+
+//Updating trainer information with uploading photo-multer
 app.put("/enroll", verifyTrainerToken, function (req, res) {
+
+    res.header("Access-Control-Allow-Origin","*")
+    res.header("Access-Control-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
+
     var trainer = {
         email: req.body.email,
         address: req.body.address,
@@ -236,7 +302,7 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
         company: req.body.company,
         designation: req.body.designation,
         courses: req.body.courses,
-        photo: req.body.photo,
+        // photo: req.file.filename,
         trainer_id: req.body.t_id
     };
     trainerData.findOneAndUpdate({ email: trainer.email },
@@ -246,7 +312,7 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
             company: trainer.company,
             designation: trainer.designation,
             courses: trainer.courses,
-            photo: req.body.photo,
+            // photo: 'http://localhost:3000/assets/profileimages/'+req.file.filename,
             trainer_id: req.body.t_id}
         }, (error, trainer) => {
             if (error) {
@@ -254,9 +320,10 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
             } else {
                 console.log(trainer);
                 res.json({ status: true, reply: "trainer update" }).status(200);
+                 
             }
         })
-})
+});
 
 app.put("/approve-trainer", verifyAdminToken, function (req, res) {
     console.log("trainer received:" + req.body.email)
