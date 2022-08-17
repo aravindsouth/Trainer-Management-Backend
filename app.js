@@ -237,11 +237,11 @@ app.post("/signup", function (req, res) {
 //Sets up file storage destination
 var storage = multer.diskStorage({
     destination: function(req, res, cb) {
-        cb(null, './assets/profileimages/')
+        cb(null, path.join(__dirname, '../', 'Trainer-Management-Frontend/src/assets/ProfilePics'))
     },
     filename: function(req, file, cb) {
         let ext = path.extname(file.originalname);
-        cb(null, Date.now() + ext);
+        cb(null, file.fieldname + Date.now() + ext);
     }
 });
 
@@ -275,10 +275,9 @@ app.post('/uploadphoto', upload.single('file'), (req, res, next) => {
         res.send(file);
     }
 
-    // Save to mongodb collection
-        
+    // Save to mongodb collection        
     var upimage = {        
-        photo: 'http://localhost:3000/assets/profileimages/'+req.file.filename
+        photo: 'Trainer-Management-Frontend/src/assets/ProfilePics/'+req.file.filename
     }
     var info = new upimage(info);
     info.save();
