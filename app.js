@@ -229,16 +229,19 @@ app.post("/signup", function (req, res) {
 })
 
 app.put("/enroll", verifyTrainerToken, function (req, res) {
+    console.log("update received", req.body)
+    console.log("-------")
     var trainer = {
-        email: req.body.email,
-        address: req.body.address,
-        skills: req.body.skills,
-        company: req.body.company,
-        designation: req.body.designation,
-        courses: req.body.courses,
-        photo: req.body.photo,
-        trainer_id: req.body.t_id
+        email: req.body.trainer.email,
+        address: req.body.trainer.address,
+        skills: req.body.trainer.skills,
+        company: req.body.trainer.company,
+        designation: req.body.trainer.designation,
+        courses: req.body.trainer.courses,
+        photo: req.body.pic_uri
     };
+
+    console.log(trainer)
     trainerData.findOneAndUpdate({ email: trainer.email },
         {
             $set:{address: trainer.address,
@@ -246,8 +249,8 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
             company: trainer.company,
             designation: trainer.designation,
             courses: trainer.courses,
-            photo: req.body.photo,
-            trainer_id: req.body.t_id}
+            photo: trainer.photo
+            }
         }, (error, trainer) => {
             if (error) {
                 console.log(error);
