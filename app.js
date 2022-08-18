@@ -264,9 +264,9 @@ var upload = multer({
 
 });
 
-app.post('/uploadphoto', upload.single('file'), (req, res, next) => {
-    const file = req.file;        
-    console.log(file.filename);
+app.post('/uploadphoto', upload.single('photo'), (req, res, next) => {
+    const file = req.photo;        
+    console.log(file);
     if(!file) {
         const error = new Error("No files uploaded!");
         error.httpStatusCode = 400;
@@ -275,7 +275,8 @@ app.post('/uploadphoto', upload.single('file'), (req, res, next) => {
         res.send(file);
     }
 
-    // Save to mongodb collection        
+    
+
     var upimage = {        
         photo: 'Trainer-Management-Frontend/src/assets/ProfilePics/'+req.file.filename
     }
@@ -283,12 +284,33 @@ app.post('/uploadphoto', upload.single('file'), (req, res, next) => {
     info.save();
     res.json({status: true, reason: "info added"}).status(200);
     console.log("Successfully added");
+
+    //To save path to mongodb
+    // var trainer = {
+    //     email: req.body.email,
+    //     photo: req.file.photo,
+    //     trainer_id: req.body.t_id
+    // };
+    // trainerData.findOneAndUpdate({ email: trainer.email },
+    //     {
+    //         $set:{photo: 'Trainer-Management-Frontend/src/assets/ProfilePics/'+req.file.filename }
+    //     }, (error, trainer) => {
+    //         if (error) {
+    //             console.log(error);
+    //         } else {
+    //             // console.log(trainer);
+    //             res.json({ status: true, reply: "photo update" }).status(200);
+                 
+    //         }
+    //     })
+
+
     
 });
-// -------------------------------------------------------------------------------------------------------------
+// multer ends-------------------------------------------------------------------------------------------------------------
 
 
-//Updating trainer information with uploading photo-multer
+//Updating trainer information 
 app.put("/enroll", verifyTrainerToken, function (req, res) {
 
     res.header("Access-Control-Allow-Origin","*")
@@ -317,7 +339,7 @@ app.put("/enroll", verifyTrainerToken, function (req, res) {
             if (error) {
                 console.log(error);
             } else {
-                console.log(trainer);
+                // console.log(trainer);
                 res.json({ status: true, reply: "trainer update" }).status(200);
                  
             }
