@@ -74,7 +74,7 @@ adminRouter.get("/", verifyAdminToken, function (req, res) {
 })
 
 // approve trainer
-adminRouter.put("/", verifyAdminToken, function (req, res) {
+adminRouter.put("/approve-trainer", verifyAdminToken, function (req, res) {
     console.log("trainer received:" + req.body.email)
     trainerData.findOne({email: req.body.email}, function (error, trainer) {     
         if(!error){
@@ -124,7 +124,7 @@ adminRouter.put("/set-employment-type",verifyAdminToken, function (req, res) {
 })
 
 // adding new courses for trainer
-adminRouter.put("/", verifyAdminToken, function(req, res) {
+adminRouter.put("/add-course", verifyAdminToken, function(req, res) {
     console.log(req.body)
     course_data = {
         course_id: req.body.course_id,

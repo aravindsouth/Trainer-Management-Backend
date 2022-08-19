@@ -20,9 +20,9 @@ app.use("/login", loginRouter);
 app.use("", loginRouter);
 app.use("/signup", signupRouter);
 app.use("/trainers", adminRouter);
-app.use("/approve-trainer", adminRouter);
 app.use("/trainer-update/", adminRouter);
-app.use("/add-course", adminRouter);
+app.use("/trainer-update/", adminRouter);
+app.use("/trainer-update", adminRouter);
 app.use("/trainer-profile", trainerRouter)
 app.use("/enroll", trainerRouter)
 
