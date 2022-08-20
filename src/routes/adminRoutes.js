@@ -73,6 +73,18 @@ adminRouter.get("/", verifyAdminToken, function (req, res) {
         })
 })
 
+// get trainer profile
+adminRouter.get("/:trainer_email", verifyAdminToken, function (req, res) {
+    trainerData.findOne({ "email": req.params.trainer_email }, (error, trainer) => {
+        if (!error) {
+            console.log(req.params)
+            console.log(trainer);
+            res.send(trainer).status(200)
+        } else {
+            res.send("trainer data not found")
+        }
+    })
+})
 // approve trainer
 adminRouter.put("/approve-trainer", verifyAdminToken, function (req, res) {
     console.log("trainer received:" + req.body.email)

@@ -25,6 +25,7 @@ app.use("/trainer-update/", adminRouter);
 app.use("/trainer-update", adminRouter);
 app.use("/trainer-profile", trainerRouter)
 app.use("/enroll", trainerRouter)
+app.use("/trainer-view/", adminRouter)
 
 
 app.get("/", (req, res) => {
