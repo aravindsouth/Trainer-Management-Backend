@@ -45,7 +45,7 @@ trainerRouter.put("/", verifyTrainerToken, function (req, res) {
         skills: req.body.trainer.skills,
         company: req.body.trainer.company,
         designation: req.body.trainer.designation,
-        courses: req.body.trainer.courses,
+        courses: req.body.trainer.courses.map((x) => x.course_name),
         photo: req.body.pic_uri
     };
 
