@@ -124,6 +124,8 @@ app.get("/trainer-profile/:trainer_email", verifyTrainerToken, function (req, re
     })
 })
 
+
+
 // post methods
 
 app.post("/login", function (req, res) {
