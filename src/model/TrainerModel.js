@@ -19,7 +19,8 @@ const trainerSchema = new schema({
     photo: String,
     trainer_id: String,
     approved: Boolean,
-    ict_data: {
+    employment_type: String,
+    ict_courses_data: [{
         start_date: Date,
         end_date: Date,
         time: String,
@@ -27,7 +28,7 @@ const trainerSchema = new schema({
         batch_id: String,
         meeting_location: String,
         schedule: String
-    }
+    }]
 
 });
 
