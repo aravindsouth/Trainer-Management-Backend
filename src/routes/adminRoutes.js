@@ -65,6 +65,40 @@ function sendEmail(data) {
     }
 }
 
+// course allocation email
+function courseEmail(email_data, email) {
+    try {
+        //console.log("course email called: ",email_data)
+        let transport = {
+            host: "smtp-relay.sendinblue.com",
+            port: 587,
+            secure: false, // upgrade later with STARTTLS
+            auth: {
+                user: "aravindkerala1@gmail.com",
+                pass: process.env.MAILER_PASS,
+            }
+        }
+        let send_data = {
+            from: "ictacademyadmin@ictaktrainer.com",
+            to: email,
+            subject: "New Course Allocation",
+            text: `Your allocated course is: ${email_data.course_id} .Start date ${email_data.start_date}. End date ${email_data.end_date}`,
+            html: `<p> Hi ${email} </p> <p>Your allocated course is, course id: ${email_data.course_id}.</p><p> Batch ID is ${email_data.batch_id}</p><p>Start date ${email_data.start_date}. End date ${email_data.end_date}</p><p>Class Time: ${email_data.time}</p><p>Meet Link: ${email_data.meeting_location} </p>`
+        };
+        let transporter = nodemailer.createTransport(transport)
+
+        transporter.sendMail(send_data, function (err, info) {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log(info)
+            }
+        })
+    } catch (error) {
+        return error
+    }
+}
+
 // get trainers list
 adminRouter.get("/", verifyAdminToken, function (req, res) {
     trainerData.find()
@@ -149,11 +183,12 @@ adminRouter.put("/add-course", verifyAdminToken, function(req, res) {
     }
     trainerData.updateOne({email: req.body.email}, {$push: {ict_courses_data: course_data}}, (err, trainer) => {
         if(!err) {
-            console.log("updated trainer: "+trainer)
-            res.json({status: true, reason: "course added"}).status(200)
+            console.log("updated trainer: "+trainer);
+            courseEmail(course_data, req.body.email);
+            res.json({status: true, reason: "course added and email sent"}).status(200);
         }else {
-            console.log(err)
-            res.json({status: false, reason: "course not added"}).status(500)
+            console.log(err);
+            res.json({status: false, reason: "course not added"}).status(500);
         }
     })
 })
